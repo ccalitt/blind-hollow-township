@@ -444,6 +444,11 @@ Table: player_session_state
 # Pseudocode — full implementation in /backend/gossip/propagation.py
 def run_gossip_pass(player_id: str, day: int) -> None:
     state = load_session_state(player_id)
+    # replay_salt: a per-session random value written to player_session_state at session_start.
+    # It is constant within a session but differs between playthroughs by the same player.
+    # This ensures replaying with identical assignments produces different gossip outcomes,
+    # satisfying Pillar 2 (the world responds to you specifically, not to abstract choice patterns).
+    replay_salt = state.get("replay_salt") or _generate_and_store_replay_salt(player_id, state)
     bond_pairs = query_bond_pairs(player_id)          # from player_arrivals + player_choices
     zone_pairs = query_same_zone_npcs(player_id, day) # from today's assign choices
 
@@ -453,7 +458,7 @@ def run_gossip_pass(player_id: str, day: int) -> None:
         disposition = NPC_GOSSIP_DISPOSITIONS[npc_id]  # from WORLD_STATE gossip_disposition
         for candidate_id in get_transmission_candidates(npc_id, bond_pairs, zone_pairs):
             trust_weight = compute_trust(npc_id, candidate_id, bond_pairs, day)
-            roll = seeded_random(player_id, day, npc_id, candidate_id)  # deterministic per run
+            roll = seeded_random(player_id, day, npc_id, candidate_id, replay_salt)  # deterministic per run-instance
             if roll < trust_weight * disposition.base_threshold:
                 transfer_observation(
                     from_npc=npc_id,
@@ -604,7 +609,7 @@ Without caching:
   Output per call: ~300 tokens
   Claude Haiku pricing (Apr 2026): $0.25/1M input, $1.25/1M output
   Cost per call: ~$0.00075
-  Cost per session (58 calls): ~$0.044
+  Cost per session (88 calls): ~$0.066
 
 With prompt caching (95% cache hit rate, ~900 token system prompt):
   Cached input cost: $0.025/1M (10× reduction on system tokens)

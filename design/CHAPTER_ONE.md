@@ -169,6 +169,14 @@ Macro choice: determined by accumulated state — it is the choice that the play
   shaped by what the player already did. A player who covered discrepancies faces
   a macro choice about disclosure. A player who signed the Compact faces a macro
   choice about what Constance knows. The macro emerges from the micro accumulation.
+  Arc-workforce sensitivity: the macro choice's cost and available options are also
+  conditioned on the arc state of the workforce. A player with ≥ 3 Broken NPCs faces
+  a macro fork where the people who would execute their decision are damaged — the
+  choice options are the same, but the NPC behavioral state lines surrounding the
+  choice reflect a workforce at the edge of failure. The macro lands on a different
+  floor depending on what the player did to the people around them. This is the
+  compounding enforcement for optimal-path play: the productivity gain was real;
+  the workforce cost is now visible at the moment of highest moral weight.
 Fourth arrival: highest skill depth possible given season (Deep arrivals possible
   in Turning/Deep Winter), domain matches Night 5's most urgent defense need.
   Arrives at dusk - 3 minutes. Path A is impossible. Path C (immediate deployment,

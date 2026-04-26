@@ -200,7 +200,7 @@ These are "once" register items (per TONE.md's "once" rule). Each object appears
 
 ## Backend Integration
 
-Significance state is computed by the Story Progression Agent and stored in `player_session_state`.
+Significance state is computed by a **dedicated rule-based pass** (not the Story Progression Agent) and stored in `player_session_state`. This is a deterministic computation over the night event log — no LLM inference, no Enforcer gate. The Master Enforcer validates only LLM-generated text outputs (scene_text, event_text, behavioral_state_line). Rule-based computations like the significance pass and the gossip propagation pass are not Enforcer-gated; they write directly to session state after their own internal validation. This keeps the Enforcer's responsibility boundary clean: it validates generated text, not derived numeric state.
 
 ```
 player_session_state additions:

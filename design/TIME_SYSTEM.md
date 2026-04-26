@@ -47,7 +47,7 @@ DAWN PHASE    — 2 in-game hours — 2 real minutes
 ```
 
 **Total cycle**: 32 in-game hours → 45 real minutes per day/night cycle.
-**Chapter 1**: 3 full cycles → ~2h 15min clock time, within the 3–4 hour target when faction/choice interaction time is included.
+**Chapter 1**: 5 full cycles → ~3h 45min base clock time. With faction negotiation, mid-choice interaction pauses, and NPC context panel time, total playtime lands in the 4–5 hour target. The 5-day structure was established in the 2026-04-26 revision of CHAPTER_ONE.md. Do not use a 3-cycle figure here — it refers to the deprecated 3-day structure.
 
 ---
 
@@ -562,15 +562,16 @@ The silver lining scales with the threat: Deep Winter arrivals are more skilled 
 
 ### Chapter 1 Guaranteed Arrival Sequence
 
-Independent of season, Chapter 1 delivers three specific arrivals:
+Independent of season, Chapter 1 delivers four specific arrivals across Days 2–5 (Day 1 has no arrival — the player learns the original six NPCs first). This is the authoritative sequence. The NPC_INFLOW_PRODUCTIVITY.md specification matches this.
 
 | Day | Arrival type | Design intent |
 |-----|-------------|---------------|
-| Day 1 | One Surface arrival, any domain | Establishes the mechanic at low stakes |
-| Day 2 | One Practiced arrival in the domain the player has neglected most | The world fills gaps |
-| Day 3 | One arrival whose domain matches the player's most urgent night-watch need | The trap's perverse compensation — arrives with 3 min dusk window |
+| Day 2 | One Surface arrival, any domain | Establishes the mechanic at low stakes |
+| Day 3 | One Practiced arrival in the domain the player has neglected most | The world fills the gap the player left |
+| Day 4 | One Practiced arrival whose domain matches Night 4's most urgent defense gap | Computed from threat state, not domain absence — forces a triage choice |
+| Day 5 | One arrival at highest available depth, domain matched to Night 5's most urgent need | Arrives at dusk minus 3 minutes. Path A is impossible. The game's last decision is also its most human. |
 
-The Day 3 arrival is the clearest silver lining in Chapter 1: the worst night brings the most relevant help. But integration is impossible in 3 minutes. Path C (immediate deployment, arc damage) is the only efficient option. The game does not label this.
+The Day 5 arrival is the clearest silver lining in Chapter 1: the worst night brings the most capable help. But integration is impossible in 3 minutes. Path C (immediate deployment, arc damage) is the only efficient option. The game does not label this.
 
 ```gdscript
 # NPCInflowSystem.gd
@@ -590,11 +591,12 @@ const SKILL_DEPTH_WEIGHTS := {
     Season.THAW:         [0.55, 0.40, 0.05],
 }
 
-# Chapter 1 guaranteed sequence (overrides random arrival on days 1-3)
+# Chapter 1 guaranteed sequence (overrides random arrival on days 2-5; Day 1 has no arrival)
 const CHAPTER_1_GUARANTEED := {
-    1: { "depth": "surface",   "domain": "any",       "special": false },
-    2: { "depth": "practiced", "domain": "neglected",  "special": false },  # domain resolved at runtime
-    3: { "depth": "any",       "domain": "urgent",     "special": true },   # arrives at dusk -3min
+    2: { "depth": "surface",   "domain": "any",       "special": false },
+    3: { "depth": "practiced", "domain": "neglected",  "special": false },  # domain resolved at runtime
+    4: { "depth": "practiced", "domain": "urgent",     "special": false },  # urgent = highest threat gap
+    5: { "depth": "any",       "domain": "urgent",     "special": true },   # arrives at dusk -3min
 }
 
 func evaluate_arrival(current_day: int, debt_level: float) -> void:

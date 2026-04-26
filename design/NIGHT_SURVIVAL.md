@@ -214,6 +214,9 @@ action — the horror is realizing at night that the eastern ridge is undefended
 - All NPCs available for night assignment (those not injured, not arc-broken)
 - Current assignment status per post: STAFFED / EMPTY
 - One line of each NPC's behavioral state (from NPC Behavior Agent — their current arc condition)
+- On Night 2+: each post's last-night outcome as a single descriptor — e.g. "Eastern Ridge — quiet", "Zone 4 post — Walker reached here". No explanation. The player has earned this context by surviving the previous night. On Night 1 this field is blank — the player has seen nothing yet, which is the correct horror.
+
+**Night 1 roster design rule**: On the first night, the player has no prior night data. The roster lists posts and NPCs with no consequence context. This is intentional. The player is making an assignment in the dark. The game does not compensate for this with tooltips or warnings. What Night 1 teaches is learned through the Dawn consequence thread — the player carries that knowledge into Night 2's roster, and the roster then reflects it. The learning curve is one cycle, not zero.
 
 **Assignment rules**:
 - Each NPC can be assigned to exactly one post

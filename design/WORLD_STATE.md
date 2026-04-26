@@ -149,6 +149,23 @@ Constance Harrow has no primary domain in this schema — her function is inform
 
 ---
 
+## 3b. Opening Arc States — Original Six NPCs
+
+The original six NPCs do not go through the arriving-NPC settling curve. Their arc states at Hour 0:00 are authored and fixed. The Arc Agent and NPC Behavior Agent read these as the starting values in `player_session_state`. These are the only values that are not derived from the player's choice log — they are the pre-player condition of the township.
+
+| NPC | Opening arc_state | Rationale |
+|-----|------------------|-----------|
+| Ruth Callan | `present` | Four months in. Has found her footing. Not contributing — she's waiting to see what the new manager is before she invests. |
+| Thomas Vael | `functional` | Seven months in. Competent, operating. Not present — the thing he has not reported keeps him sideways. |
+| Maren Voss | `present` | Three months in. The most recently arrived. Still calibrating. Capable but not yet contributing. |
+| Elias Grout | `present` | Nine months in. Productive by habit. His arc is stable but fragile in a specific direction: if he reports and is not believed again, it moves toward `fragile`. |
+| Constance Harrow | `contributing` | Three to four years in. Fully integrated. Her arc is not at risk from external assignment choices — only from what she chooses to do with what she knows. |
+| Peder Lund | `contributing` | Two years in. The most settled of the six. His arc risk is not pressure from outside — it is the foundation question, which is internal. |
+
+**Implementation note**: These are written to `player_session_state` at session initialization (before Day 1 begins), keyed under `npc_states.[npc_id].arc_state`. The Arc Agent reads and updates them. The NPC Behavior Agent receives them in the USER block. Arrivals begin in `settling` and follow the NPC_INFLOW_PRODUCTIVITY.md settling curve. The original six do not.
+
+---
+
 ## 4. The Three Factions
 
 ---
@@ -216,3 +233,17 @@ Constance Harrow has no primary domain in this schema — her function is inform
 - Structure fourth wall: Peder's crew works toward the hollow all day. The foundation question is not raised until the player assigns interior work. Night 1 is quiet. Night 2 is not.
 - Mill reinforcement: The incomplete structure stays at three walls. Ruth's timeline commitment to the Association is broken on Day 1. The Association's trust does not begin to accumulate. Night 1 is complicated by the labor dispute, not by the hollow.
 - Western hollow perimeter survey: Peder refuses — quietly, with a logistics justification. The player receives their first indication that something has happened at the hollow previously. They also receive Dix's gratitude, which is the Compact's suspicion.
+
+---
+
+## 7. The Player Character's Mechanical Surface
+
+The player character is not a stat-tracked entity. But their trap condition — the name of the person they were going home to becoming unreliable — is a consequence that the world can witness and respond to. This is the Watched Feeling (Pillar 2) applied to the player's own situation.
+
+**The name erosion mechanic**: The player character's `anchor_name` is stored in `player_session_state` at session start as a string chosen by the player (optional; if skipped, treated as "someone"). Over Chapter 1, one event per two days may erode the player's ability to access the name — not mechanically locked, but surfaced through NPC behavioral state lines that reflect the player character's behavior: "Seems like they're trying to remember something." or "Wrote something down. Crossed it out."
+
+**How the world responds**: Two NPCs — Ruth (observant) and Constance (long-tenured, has seen this before) — have behavioral state lines conditioned on the player character's anchor erosion level. This is not a conversation. It is a behavioral register: Ruth moves slightly more carefully around the player character on days when the erosion is high. Constance, if her window opens, acknowledges it once — indirectly, in her formal register — before speaking about the survey.
+
+**The consequence engine surface**: Choice log entries that involve false hope toward arrivals (WORLD_BACKSTORY.md §6) write a `choice_payload.anchor_erosion_delta: +0.1` field. The erosion value is read into the NPC Behavior Agent USER block as `player_anchor_state: [intact|degrading|hollow]`. Agents do not narrate the erosion. They adjust NPC behavioral register.
+
+**What this satisfies**: Pillar 2 (the world responds to the player specifically — not just to their choices but to their condition). The player character's trap is no longer a backstory that never enters the consequence engine.

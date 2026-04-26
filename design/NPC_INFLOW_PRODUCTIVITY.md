@@ -118,6 +118,8 @@ Arc state trajectory: Functional/Fragile → either stabilizes with delayed inte
 
 **The moral surface**: Path C produces the most output the fastest. It is also the choice that treats a frightened person as a machine. The game does not label it. The player chooses it or they don't. The arc trajectory is the consequence.
 
+**The compounding enforcement mechanism**: A player who routes all four arrivals through Path C will have four Fragile or Broken NPCs by Day 5. Broken NPCs destabilize adjacent NPCs through behavioral contagion. At three or more Broken arrivals, the contagion reaches the original six NPCs — arc-stable NPCs in adjacent zones move from `present` toward `fragile` under the Broken Theorist's influence. This is not a punishment system. It is the design working: a township full of people treated as machines behaves like a machine approaching failure. Night 5 finds the player with higher output capacity (they maximized productivity) and a structurally destabilized workforce. The Surveyor measures what was built. A high-output, high-Broken-NPC township reads differently to the consequence engine than a lower-output, arc-stable one. The macro choice on Day 5 lands harder — and costs more — when it fires into a workforce that the player has already depleted of arc resilience. The mirror is not optional; it is load-bearing for the night that follows it.
+
 ---
 
 ## Part 3 — Productivity Outputs by Domain
