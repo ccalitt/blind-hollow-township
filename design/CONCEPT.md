@@ -108,3 +108,21 @@ The player finishes Chapter 1 and:
 4. Is already dreading Day 1 of Chapter 2
 
 If the player feels satisfied, we failed. The target emotion at chapter end is: **unresolved compulsion**.
+
+---
+
+## Cross-Chapter Retention Architecture
+
+The RELIEF → UNEASE → COMPULSION loop is designed to complete within a single session. That architecture is correct. The gap it does not address: across sessions and chapters, the loop has no designed reentry point. A player returning for Chapter 2 arrives in the same emotional register Chapter 1 ended in — unresolved, implicated, dreading — with no earned breath before the next accumulation begins. Without a designed return to RELIEF at chapter start, every chapter opens at UNEASE. The dread stops being earned and starts being ambient. That is a different game, and a worse one.
+
+The fix is structural, not tonal. It is called the **False Dawn** model.
+
+Chapter 2 opens with one specific, traceable positive outcome from Chapter 1. Something the player could not be certain would survive — that survived. This is the anchor. It is not a cutscene reassurance or a fabricated good news beat. It is a real consequence of what the player chose. The relief is genuine because the player knows they are responsible for it.
+
+The anchor is not arbitrary. It is the NPC with the highest player-investment signal from Chapter 1: the one the player directed the most choices toward protecting. This is not interpretation — it is computable from the choice log. The player made their attachment legible through their decisions. The system reads it back.
+
+The relief is brief and conditional. Within 15–20 minutes of Chapter 2, the survival is complicated. Not reversed — the thing still made it. But a deferred cost surfaces. The thing that survived is now in a new kind of danger because it survived. The player's protection did not prevent the cost. It rerouted it.
+
+This is *Every right choice arrives already compromised* — applied at chapter scale. The player chose to protect this person. That choice was right. The cost of it being right is what Chapter 2 is about.
+
+The model scales forward. Chapter 3's anchor is the thing Chapter 2 made possible. The dread compounds through accumulated attachment, not through escalating spectacle. Each chapter earns its horror from the one before it. The player carries the weight themselves.
