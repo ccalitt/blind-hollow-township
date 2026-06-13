@@ -1,0 +1,158 @@
+{
+  "_doc": "Authored fallback night-event library (CRITICAL_GAPS_PLAN.md Gap 8). These stand in for the LLM Horror Agent in the offline slice. Each event needs only an npc_id + zone + day to render; the {npc} / {zone_name} tokens are filled at runtime. Register per TONE.md: specific, quiet, traceable, no resolution. Every event declares a trigger so it can ONLY fire when traceable to a player choice (Pillar 1: no horror disconnected from choice). 'trigger.type' is matched by NightDirector.gd against the day's choice log and building list.",
+  "events": [
+    {
+      "event_id": "fb_walker_adjacency",
+      "trigger": {"type": "building_zone5_adjacent"},
+      "horror_intensity": 2,
+      "creature": "walker",
+      "zone": "zone_5",
+      "event_text": "{npc} reports a shape at the western treeline that was not there at dusk. It has not moved since. It is closer than it should be for something that has not moved.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_walker_incomplete_fourth_wall",
+      "trigger": {"type": "action", "action_type": "peder_crew_zone4_fourth_wall"},
+      "horror_intensity": 1,
+      "creature": "walker",
+      "zone": "zone_4",
+      "event_text": "The fourth wall went up today. {npc} says the new timber smells wrong. Not rot. Older than rot.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_ledger_watcher_cover",
+      "trigger": {"type": "action", "action_type": "cover_discrepancy"},
+      "horror_intensity": 2,
+      "creature": "watcher",
+      "zone": "zone_1",
+      "event_text": "The morning count will not match. {npc} did not touch the ledger overnight. One line has been moved anyway.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_ledger_watcher_edited",
+      "trigger": {"type": "action", "action_type": "association_ledger_edited"},
+      "horror_intensity": 2,
+      "creature": "watcher",
+      "zone": "zone_1",
+      "event_text": "The edited figure {npc} entered is gone from the page. The true figure is back. No one was at the post.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_watcher_compact_surplus",
+      "trigger": {"type": "action", "action_type": "compact_surplus_accepted"},
+      "horror_intensity": 2,
+      "creature": "watcher",
+      "zone": "zone_1",
+      "event_text": "The surplus the Compact sent was stacked in the Mill Quarter by dusk. By third watch the stack is shorter than it was. {npc} did not log a withdrawal.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_elias_confirmed",
+      "trigger": {"type": "action", "action_type": "elias_report_logged"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_3",
+      "event_text": "{npc} was on the eastern ridge with the report logged. He has the measurement now. The treeline is three yards in from the stake he set last week.",
+      "arc_delta": {"emotion": "afraid", "arc_state": "contributing"}
+    },
+    {
+      "event_id": "fb_elias_unbelieved",
+      "trigger": {"type": "action", "action_type": "elias_report_ignored"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_3",
+      "event_text": "{npc} stood the watch with nothing logged. He saw it again. There is no stake to measure against. There is no record that he ever asked.",
+      "arc_delta": {"emotion": "afraid", "arc_state": "fragile"}
+    },
+    {
+      "event_id": "fb_vacated_safe_post",
+      "trigger": {"type": "vacated_post", "zone": "zone_3"},
+      "horror_intensity": 2,
+      "creature": "walker",
+      "zone": "zone_3",
+      "event_text": "The eastern ridge post {npc} was moved off of stood empty at third watch. The one thing that faced away from the hollow was not facing anything.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_assigned_incomplete_structure",
+      "trigger": {"type": "assigned_zone", "zone": "zone_4"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_4",
+      "event_text": "{npc} took the visible work at the incomplete structure. By third watch they had stopped working and were standing at the open frame, looking out, not in.",
+      "arc_delta": {"emotion": "neutral"}
+    },
+    {
+      "event_id": "fb_maren_fear_leak",
+      "trigger": {"type": "gossip", "from_npc": "maren"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_2",
+      "event_text": "{npc} did not sleep. Whatever Maren said at the supply post in the afternoon, {npc} has been carrying it since, and now everyone in the Common is carrying a piece of it.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_thomas_silence_pressure",
+      "trigger": {"type": "npc_arc", "npc_id": "thomas", "arc_state": "functional"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_2",
+      "event_text": "{npc} was called to a case at second watch that should not have needed a physician. He over-explained the cause of it twice and then stopped explaining it at all.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_dix_inspection_logged",
+      "trigger": {"type": "action", "action_type": "dix_inspection_approved"},
+      "horror_intensity": 2,
+      "creature": "watcher",
+      "zone": "zone_5",
+      "event_text": "Dix's inspection is on the county record now. The hollow's entry point is documented. {npc} says the documentation is correct in every figure but one, and the wrong figure is the one no one entered.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_dix_denied_debt",
+      "trigger": {"type": "action", "action_type": "dix_inspection_denied"},
+      "horror_intensity": 2,
+      "creature": "walker",
+      "zone": "zone_5",
+      "event_text": "The inspection was refused and the audit flag stays open with the old survey standing. {npc} reports the western treeline did not hold its line tonight. It restated itself.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_compact_ratified",
+      "trigger": {"type": "action", "action_type": "compact_ratification_signed"},
+      "horror_intensity": 2,
+      "creature": "watcher",
+      "zone": "zone_1",
+      "event_text": "The falsified survey is the township's official record now. {npc} applied the unlocked resources to the Mill Quarter today. The Mill Quarter is the quietest it has been and the quiet has a weight.",
+      "arc_delta": {"emotion": "afraid"}
+    },
+    {
+      "event_id": "fb_building_zone1_quiet",
+      "trigger": {"type": "building_placed", "zone": "zone_1"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_1",
+      "event_text": "The new structure in the Mill Quarter finished fading in by dusk. {npc} walked its perimeter twice at first watch and would not say what they were counting.",
+      "arc_delta": {"emotion": "neutral"}
+    },
+    {
+      "event_id": "fb_disclosed_quiet",
+      "trigger": {"type": "action", "action_type": "association_ledger_unedited"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_2",
+      "event_text": "The discrepancies are on the table, unedited, where the Association can read them. {npc} slept through the night. It is the only thing about tonight that is not wrong, and it does not feel like safety.",
+      "arc_delta": {"emotion": "neutral"}
+    },
+    {
+      "event_id": "fb_bond_vulnerability",
+      "trigger": {"type": "action", "action_type": "bond_acknowledge"},
+      "horror_intensity": 1,
+      "creature": "none",
+      "zone": "zone_3",
+      "event_text": "{npc} and their partner held the same post again tonight, the way you kept them. One of them was the one who saw it. Now they both have.",
+      "arc_delta": {"emotion": "afraid"}
+    }
+  ]
+}

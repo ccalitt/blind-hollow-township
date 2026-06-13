@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3 uid="uid://b8hwtownship01"]
+
+[ext_resource type="Script" path="res://scripts/world/Township.gd" id="1_township"]
+[ext_resource type="Script" path="res://scripts/world/CameraRig.gd" id="2_camrig"]
+[ext_resource type="Script" path="res://scripts/world/WorldLighting.gd" id="3_lighting"]
+
+[sub_resource type="Environment" id="Environment_day"]
+background_mode = 1
+background_color = Color(0.55, 0.58, 0.62, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.66, 0.72, 0.78, 1)
+ambient_light_energy = 0.4
+fog_enabled = true
+fog_light_color = Color(0.75, 0.75, 0.69, 1)
+fog_density = 0.015
+
+[node name="Township" type="Node3D"]
+script = ExtResource("1_township")
+
+[node name="WorldLighting" type="Node3D" parent="."]
+script = ExtResource("3_lighting")
+
+[node name="Sun" type="DirectionalLight3D" parent="WorldLighting"]
+transform = Transform3D(0.766, -0.433, 0.475, 0, 0.74, 0.673, -0.643, -0.515, 0.566, 0, 12, 0)
+light_color = Color(0.91, 0.78, 0.6, 1)
+light_energy = 1.4
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="WorldLighting"]
+environment = SubResource("Environment_day")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("2_camrig")
+
+[node name="Pivot" type="Node3D" parent="CameraRig"]
+
+[node name="Arm" type="Node3D" parent="CameraRig/Pivot"]
+transform = Transform3D(1, 0, 0, 0, 0.766, 0.643, 0, -0.643, 0.766, 0, 0, 18)
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/Pivot/Arm"]
+fov = 70.0

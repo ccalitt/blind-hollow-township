@@ -1,0 +1,28 @@
+# Godot 4 .gitignore
+
+# Godot-specific imported/generated files
+.godot/
+/android/
+/builds/
+/export/
+
+# Exported binaries
+*.exe
+*.pck
+*.zip
+*.dmg
+*.x86_64
+*.app
+
+# Mono/C# (unused here, but safe)
+.mono/
+data_*/
+
+# Editor/OS noise
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Keep the import system happy but ignore the generated cache
+*.import

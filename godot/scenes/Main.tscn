@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3 uid="uid://c4hwmain0001"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://b8hwtownship01" path="res://scenes/Township.tscn" id="2_township"]
+[ext_resource type="Script" path="res://scripts/systems/GameDirector.gd" id="3_director"]
+[ext_resource type="Script" path="res://scripts/ui/GameUI.gd" id="4_ui"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="Township" parent="." instance=ExtResource("2_township")]
+
+[node name="GameDirector" type="Node" parent="."]
+script = ExtResource("3_director")
+
+[node name="GameUI" type="CanvasLayer" parent="."]
+script = ExtResource("4_ui")
