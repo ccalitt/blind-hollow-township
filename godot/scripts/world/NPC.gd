@@ -37,9 +37,14 @@ func _build_visual() -> void:
 	_sprite.shaded = false
 	_sprite.pixel_size = 0.03
 	_sprite.position = Vector3(0, 1.2, 0)
+	# Assign a texture immediately: a Sprite3D with a null texture has a null
+	# internal mesh (invisible on a display, and noisy under the headless dummy
+	# renderer). _refresh() overrides this once GameState is populated.
+	_sprite.texture = Placeholder.npc_texture("neutral")
 	add_child(_sprite)
 
 	_name_label = Label3D.new()
+	_name_label.text = npc_id  # non-empty so the Label3D has a mesh; _refresh sets the real name
 	_name_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_name_label.position = Vector3(0, 2.6, 0)
 	_name_label.font_size = 28

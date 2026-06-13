@@ -152,7 +152,7 @@ func _process(_delta: float) -> void:
 	if TimeManager.current_phase != TimeManager.Phase.DAY:
 		_cancel_placement()
 		return
-	var hit := _ground_under_cursor()
+	var hit: Variant = _ground_under_cursor()
 	if hit == null:
 		_ghost.visible = false
 		return
@@ -173,7 +173,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		EventBus.build_menu_toggled.emit(false)
 		return
 	if event.is_action_pressed("select"):
-		var hit := _ground_under_cursor()
+		var hit: Variant = _ground_under_cursor()
 		if hit == null:
 			return
 		var cell := _world_to_cell(hit)
