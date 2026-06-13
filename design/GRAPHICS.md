@@ -1,20 +1,42 @@
 # Graphics & Visual System — Hollow Township
 
-> Status: IN PROGRESS (2026-04-26). Perspective, rendering model, and visual language are proposed below.
-> Awaiting design review before freeze. All decisions must serve PILLARS.md.
-> Pillar alignment tagged on every decision.
+> Status: FROZEN (reviewed 2026-06-13), with ONE exception: the sprite-readability claim
+> (see "Character Rendering" and "State-Driven Visual System") is NOT frozen until the
+> CRITICAL_GAPS_PLAN.md Gap 9 prototype test passes. Everything else in this document is frozen.
+> All decisions serve PILLARS.md. Pillar alignment tagged on every decision.
 
 ---
 
-## Design Constraints Driving Visual System
+## ⚠ Prototype Gate — Sprite Readability (CRITICAL_GAPS_PLAN.md Gap 9 — UNRESOLVED)
 
-Every visual decision is downstream of the frozen pillars:
+The claim that 2D billboard NPC sprites at 8–12% screen height (96×128px) carry sufficient
+emotional information to support Pillar 2 (The Watched Feeling) is the technical foundation of
+this document — and it is **not validated**. Per CRITICAL_GAPS_PLAN.md Gap 9, this is a
+**prototyping gate, not a documentation gap**. The following sections remain NOT frozen until
+the Gap 9 validation test passes (recognition rate ≥ 80% across 4 emotional states at the
+proposed camera distance/elevation):
+- Character Rendering — PROPOSED (sprite size, billboard approach, directional angles)
+- State-Driven Visual System — NPC Appearance (emotion readability via shader/layers)
+- Surveyor's Shadow sprite size (96×128px) — inherits the same readability dependency
 
-- **Earned Dread** (Pillar 1) → horror is visible consequence, not atmosphere. Buildings change. NPCs change. The world shows what the player built.
-- **The Watched Feeling** (Pillar 2) → named NPCs must be emotionally readable at a glance. Sprites over abstract 3D.
-- **Moral Weight at Every Turn** (Pillar 3) → logistics UI must feel mechanical. Art must not editorialize. No visual signaling of "this is a moral choice."
-- **Day/Night as Structural Argument** (Pillar 4) → day and night must look and feel architecturally different. Color palette, fog, lighting — all shift.
-- **Genre Whitespace** (Pillar 5) → visual language must sit at the intersection of horror + simulation + drama. Not cartoon. Not photo-real. Not gothic horror. Something between Frostpunk's gray industry and Darkest Dungeon's high-contrast silhouettes.
+If the prototype fails, the fallback design in Gap 9 applies (larger sprites — 128×192 for
+primary NPCs — or world-space state indicators). All other visual systems (perspective, color,
+lighting, fog, creature design for Walkers/Watchers, transitions, UI) are frozen independent
+of this gate.
+
+---
+
+## Pillar Compliance
+
+Every visual decision is downstream of the frozen pillars. Major mechanics and the pillar(s) they satisfy:
+
+- **Earned Dread** (Pillar 1) → horror is visible consequence, not atmosphere. Buildings change (pristine/damaged/corrupted), NPCs change, the world shows what the player built. Walkers read as "timber in a different position than it was" — quiet wrongness, not spectacle. No jump-scare visual language.
+- **The Watched Feeling** (Pillar 2) → named NPCs must be emotionally readable at a glance (sprites over abstract 3D); the night-phase camera snap looks at what matters, not what the player wants to see. *(Readability dependent on Gap 9 prototype — see gate above.)*
+- **Moral Weight at Every Turn** (Pillar 3) → logistics UI feels mechanical. No color coding of moral weight, no confirmation dialogs on micro choices, no post-choice summary. Art does not editorialize.
+- **Day/Night as Structural Argument** (Pillar 4) → day and night look and feel architecturally different (palette, fog, lighting all shift); the 2.5s transition is narrative punctuation, not a cut. The no-pause rule is reframed per CRITICAL_GAPS_PLAN.md Gap 5 — pause is permitted but freezes the player inside what they built (see Night phase UI).
+- **Genre Whitespace** (Pillar 5) → visual language sits at the intersection of horror + simulation + drama. Not cartoon. Not photo-real. Not gothic horror. Between Frostpunk's gray industry and Darkest Dungeon's high-contrast silhouettes.
+
+**NOT-THIS compliance**: no moral-weight color coding (not a binary moral system), horror is consequence-visible not jump-scare, pause does not create a safe retreat (it forces the player to keep looking).
 
 ---
 
@@ -89,7 +111,7 @@ Every `Sprite3D` uses `billboard = BILLBOARD_ENABLED` (built-in Godot). Sprites 
 
 ### Directional Angles
 
-4-directional minimum (N/E/S/W). 8-directional preferred for larger NPCs or story-critical characters (Sarah, the Priest, the faction leaders). NPCs who are background figures: 4-directional sufficient.
+4-directional minimum (N/E/S/W). 8-directional preferred for the six named NPCs (Ruth, Thomas, Maren, Elias, Constance, Peder — see WORLD_STATE.md) and faction representatives. Arrivals and background figures: 4-directional sufficient.
 
 ---
 

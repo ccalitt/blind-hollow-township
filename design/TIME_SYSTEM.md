@@ -1,7 +1,10 @@
 # Time System — Day, Night & Season Cycle
 
-> Status: IN PROGRESS (2026-04-26). Timer logic, seasonal structure, Godot implementation spec.
-> Serves PILLARS.md. Pending review before freeze.
+> Status: IN PROGRESS (reviewed 2026-06-13). Timer logic, seasonal structure, Godot implementation spec.
+> Serves PILLARS.md. Pillar-compliant on all five pillars. NOT frozen: one internal
+> inconsistency between the season-transition formula and the Chapter 1 Season Map blocks freeze
+> — see "⚠ Pillar Conflicts / Open Inconsistency — Needs Author Decision" at the bottom.
+> Fixed in review: replaced the deprecated 3-day Real-Time Season Duration table with the 5-day arc.
 
 ---
 
@@ -255,6 +258,11 @@ Seasons do not transition on a fixed day counter. They transition when a thresho
 const SEASON_THRESHOLDS := {
     # [min_day, min_debt_level] to transition INTO this season
     # Thresholds shifted for 5-day Chapter 1 arc
+    # ⚠ See "Pillar Conflicts / Open Inconsistency" at the bottom of this doc: the strict
+    #   AND(min_day, min_debt) formula in _compute_target_season below cannot reproduce the
+    #   debt-accelerated diagonal shown in the Chapter 1 Season Map (high-DEBT paths must reach
+    #   Turning/Deep Winter on EARLIER days than low-DEBT paths). The transition formula needs
+    #   an author decision before these constants are final.
     Season.TURNING:     { "day": 4,  "debt": 0.4 },   # reachable Day 4 at moderate DEBT
     Season.DEEP_WINTER: { "day": 5,  "debt": 0.70 },  # reachable Night 5 only at high DEBT
     Season.THAW:        { "day": 6,  "debt": -1.0 },  # Thaw triggers at Chapter end, not debt
@@ -371,7 +379,7 @@ func begin_season_shift(season: Season, severity: float) -> void:
 
 ## Chapter 1 Season Map
 
-Chapter 1 spans 3 in-game days. Season transitions depend on player DEBT level. The range below shows fastest vs. slowest transition paths.
+Chapter 1 spans 5 in-game days (per the 2026-04-26 CHAPTER_ONE.md revision). Season transitions depend on player DEBT level. The range below shows fastest vs. slowest transition paths.
 
 ```
                     DAY 1        DAY 2        DAY 3        DAY 4        DAY 5
@@ -456,7 +464,7 @@ Each season carries world events that are not creature-based — environmental c
 - The ledger develops new entries in handwriting that is not Maren's and not the player character's. The entries are accurate. They describe resource movements that have not yet happened.
 
 **Thaw world events** (Chapter transition, one sequence):
-- The morning after Night 3, one object belonging to a dead or broken NPC is found in a place that should be inaccessible — inside a locked building, on a post that was unoccupied during the night. It is placed deliberately. Not dropped.
+- The morning after Night 5, one object belonging to a dead or broken NPC is found in a place that should be inaccessible — inside a locked building, on a post that was unoccupied during the night. It is placed deliberately. Not dropped.
 - The treeline has not advanced further. For the first time in days, it has held. This is not relief. It is a held breath.
 - The Surveyor's Shadow's footprints (if it marked Zone 5) are visible at dawn in the mud at the Zone 3/5 boundary. They lead into the hollow and do not come back out. They are fresh.
 
@@ -503,25 +511,34 @@ Thaw's 1.1× bonus is the game's most direct acknowledgment that the player gets
 
 ### Real-Time Season Duration Reference (Chapter 1)
 
-Based on the 45-minute day cycle and DEBT-driven tempo:
+Based on the 45-minute base day cycle and DEBT-driven tempo, across the 5-day Chapter 1 arc
+(per the 2026-04-26 CHAPTER_ONE.md revision). Season progression matches the Chapter 1 Season
+Map above and CHAPTER_ONE.md's Season-Chapter Alignment table.
 
 ```
-Scenario                   Day 1    Day 2    Day 3    Total real time
-─────────────────────────────────────────────────────────────────────
-Transparent (DEBT 0.2):    45 min   45 min   45 min   ~2h 15m
-                           (0.8×)   (0.8×)   (1.0×)   (Late Summer → Turning)
+Scenario              Day 1   Day 2   Day 3   Day 4   Day 5   Total base clock
+──────────────────────────────────────────────────────────────────────────────
+Transparent (0.2):    45 min  45 min  45 min  44 min  44 min  ~3h 43m
+                      (0.8×)  (0.8×)  (0.8×)  (1.0×)  (1.0×)  (Late Summer → Turning)
+                      Night 5 in Turning — Surveyor departs. Zone 5 stays closed.
 
-Mid DEBT (0.5):            45 min   42 min   38 min   ~2h 05m
-                           (0.8×)   (1.0×)   (1.3×)   (Summer → Turning → Winter)
-                           Note: Deep Winter's accelerated clock shortens
-                           the DAY phase but EXTENDS the NIGHT phase.
-                           Night 3 = 18.75 real minutes of observation.
+Mid DEBT (0.5):       45 min  45 min  45 min  44 min  44 min  ~3h 43m
+                      (0.8×)  (0.8×)  (0.8×)  (1.0×)  (1.0×)  (Late Summer → Turning)
+                      Night 5 Surveyor marks — player compounded on 2–3 choices.
 
-Max DEBT (0.9+):           45 min   38 min   35 min   ~1h 58m
-                           (0.8×)   (1.3×)   (1.4×)   Day time collapses; night expands.
-                           Night 2 = 18.75 min. Night 3 = 21 min (1.4× modifier).
-                           Player has the least time to act and the most night to survive.
+High DEBT (0.7+):     45 min  45 min  44 min  44 min  42 min  ~3h 40m
+                      (0.8×)  (0.8×)  (1.0×)  (1.0×)  (1.3×)  (Summer → Turning → Winter)
+                      Note: Deep Winter's accelerated clock shortens the DAY phase
+                      but EXTENDS the NIGHT phase. Night 5 = 18.75 real min observed.
+
+Max DEBT (0.9+):      45 min  44 min  44 min  42 min  40 min  ~3h 35m
+                      (0.8×)  (1.0×)  (1.0×)  (1.3×)  (1.4×)  Day time collapses; night expands.
+                      Night 4 = 18.75 min. Night 5 = 21 min (1.4× modifier).
+                      Player has the least time to act and the most night to survive.
 ```
+
+These are base-clock figures. With faction negotiation, mid-choice interaction, and NPC context-panel
+time, total playtime lands in the 4–5 hour Chapter 1 target (CHAPTER_ONE.md).
 
 The maximum DEBT path produces the shortest day phases and the longest nights. This is the correct outcome: a player who compounded every choice has the least time to build anything and the most darkness to survive.
 
@@ -558,7 +575,7 @@ Arrival rate is season-modulated and DEBT-influenced. Full mechanic specificatio
 | Deep Winter | 1 per 2 days | 45% Surface, 40% Practiced, 15% Deep | Deep arrivals possible; arrive mid-urgency (Path C pressure) |
 | Thaw | 1 per 8 days | 55% Surface, 40% Practiced, 5% Deep | Arrivals are calmer — settling curve shortened by 1 phase |
 
-The silver lining scales with the threat: Deep Winter arrivals are more skilled but arrive when the player has the least time to integrate them. The Day 3 guaranteed arrival (see below) always arrives with 3 real minutes of dusk window remaining — the final integration vs. deployment choice of Chapter 1.
+The silver lining scales with the threat: Deep Winter arrivals are more skilled but arrive when the player has the least time to integrate them. The Day 5 guaranteed arrival (see below) always arrives with 3 real minutes of dusk window remaining — the final integration vs. deployment choice of Chapter 1.
 
 ### Chapter 1 Guaranteed Arrival Sequence
 
@@ -618,7 +635,7 @@ func _trigger_guaranteed_arrival(day: int) -> void:
     var archetype := _pick_archetype()
     var arrival := ArrivalEvent.new(archetype, domain, depth)
     if spec.special:
-        # Day 3: schedule arrival at dusk -3min (TimeManager.get_dusk_time() - 180s)
+        # Day 5: schedule arrival at dusk -3min (TimeManager.get_dusk_time() - 180s)
         arrival.schedule_at(TimeManager.get_dusk_time() - 180.0)
     else:
         arrival.dispatch()
@@ -657,3 +674,19 @@ The player knows it is getting late because the world tells them, not because a 
 | Pillar 3 — Moral Weight | The clock accelerating in Deep Winter means fewer decisions before the next night. Every choice costs more when time is shorter. The timer makes moral weight physically scarce. |
 | Pillar 4 — Day/Night Structure | The three-phase cycle (Day/Dusk/Night/Dawn) is the mechanical implementation of RELIEF→UNEASE→COMPULSION. The timer is the engine of the loop. |
 | Pillar 5 — Genre Whitespace | No other game uses a morally-driven seasonal clock where the player's ethical choices determine how long they have before the worst night arrives. This is the genre whitespace, implemented as a timer. |
+
+No pillar is violated by this system. The one blocker to freezing is an internal formula inconsistency (below), not a pillar conflict.
+
+---
+
+## ⚠ Pillar Conflicts / Open Inconsistency — Needs Author Decision
+
+**No pillar conflict.** The seasonal clock serves all five pillars (table above). The remaining issue is internal and mechanical, and it blocks freeze:
+
+**Season-transition formula vs. Chapter 1 Season Map (unresolved).** The Chapter 1 Season Map shows a *debt-accelerated diagonal*: higher-DEBT paths reach Turning and Deep Winter on **earlier** days than lower-DEBT paths (Max DEBT reaches Turning on Day 2, Deep Winter on Day 4; transparent play does not reach Turning until Day 4). But `_compute_target_season` uses a strict `AND(current_day >= min_day, debt >= min_debt)` with single fixed day-thresholds. Under that formula, every path whose DEBT clears the threshold transitions on the *same* day — it cannot produce the diagonal. DEBT only gates *whether* a season is reached, never *when*.
+
+This needs an author decision on the intended formula. Two faithful options, both consistent with the frozen CHAPTER_ONE.md Season-Chapter Alignment and the narrative intent ("high DEBT accelerates the Turning"):
+- **(A) Combined day+debt score.** Transition when `current_day + (debt * k) >= season_target_score`, so higher DEBT advances the season by whole days. Reproduces the diagonal directly.
+- **(B) Per-day DEBT bands.** A lookup of `(day, debt_band) → season` matching the Season Map exactly. More authored, less elegant, zero ambiguity.
+
+Until this is chosen and `SEASON_THRESHOLDS` / `_compute_target_season` are updated to match the Season Map, this document stays **IN PROGRESS**. Everything else (phase durations, Godot timer structure, season visual integration, arrival-timer integration, player-facing clock) is reviewed and consistent.

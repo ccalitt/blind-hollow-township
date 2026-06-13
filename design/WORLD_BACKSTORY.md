@@ -1,6 +1,43 @@
 # World Backstory — Hollow Township
 
-> Status: IN PROGRESS (2026-04-26). Foundational narrative layer. Pending review before freeze.
+> Status: FROZEN (reviewed 2026-06-13). Foundational narrative layer.
+> Reviewed against all five pillars (table below), NOT-THIS.md, WORLD_STATE.md, and ARCHITECTURE.md.
+> Consistent: NPC tenures/dispositions match WORLD_STATE.md §3/§3b; the false-hope mechanic feeds
+> the `anchor_erosion_delta` field defined in WORLD_STATE.md §7; gossip dispositions match
+> WORLD_STATE.md and ARCHITECTURE.md. No contradictions found; no edits required beyond this header.
+
+---
+
+## Pillar Compliance
+
+This is the narrative layer. It does not introduce mechanics of its own (those live in
+`NPC_INFLOW_PRODUCTIVITY.md`, `WORLD_STATE.md`, and `ARCHITECTURE.md`); it supplies the register
+and backstory those mechanics surface through. Major content tagged to the pillar(s) it serves:
+
+- **The trap mythology + escape theories (§1, §5)** → Pillar 1 (Earned Dread) and Pillar 5
+  (Genre Whitespace). The horror is ecological/bureaucratic with rules, not arbitrary; the Survey
+  Theory is "directionally true" and traces to the falsification THE DEBT collects on. NOT-THIS
+  compliance: the origin is deliberately unanswered in Chapter 1 (not an open-world reveal), keeping
+  the chapter a contained moral argument.
+- **NPC arrival backstories / "what they are trying to get back to" (§3)** → Pillar 2 (The Watched
+  Feeling). Each named NPC's anchor is a voice-register constraint, not a stat — it surfaces in how
+  they speak about their work. Tenures and registers match WORLD_STATE.md §3/§3b exactly.
+- **The inflow mechanic's narrative register (§4)** → Pillar 3 (Moral Weight). Assigning a frightened
+  arrival is logistics that is secretly a moral choice; the cost surfaces in the arrival's later arc,
+  not at assignment time. Mechanics owned by NPC_INFLOW_PRODUCTIVITY.md.
+- **False hope toward arrivals (§6)** → Pillar 2 and Pillar 3. The manager's false hope is weighted
+  more heavily (institutional authority) and is tracked through the arrival's trust register and the
+  player character's `anchor_erosion_delta` (WORLD_STATE.md §7) — the world responds to the player's
+  condition, not just their choices.
+- **The gossip culture / three-stage model (§7)** → Pillar 2 and Pillar 4. Information circulates
+  before the player is told, and night-phase transmission means Day choices shape what is known by
+  Dawn. Seeded-per-run stochasticity (ARCHITECTURE.md replay_salt) prevents an optimal suppression
+  path, preserving moral weight. NOT-THIS compliance: no new UI, no transfer notifications, no moral
+  framing on transmissions.
+
+**NOT-THIS compliance**: no survival meters (anchors are register, not hunger/sanity bars); no day
+recap (gossip and arc surface through behavioral state lines only); no binary good/evil framing on
+false hope or gossip.
 
 ---
 

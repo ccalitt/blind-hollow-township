@@ -1,8 +1,10 @@
 # Night Survival System — Hollow Township
 
-> Status: IN PROGRESS (2026-04-26). Proposed design for active night survival and day evolution loop.
-> All decisions must serve PILLARS.md. Pending review before freeze.
-> Pillar compliance tagged on every major decision.
+> Status: FROZEN (reviewed 2026-06-13). Active night survival and day evolution loop.
+> All decisions serve PILLARS.md. Pillar compliance tagged on every major decision.
+> Review note: corrected Surveyor's Shadow appearance from the deprecated 3-day timing
+> (Night 3) to the frozen 5-day timing (Night 4 pre-appearance, Night 5 climax) — now
+> consistent with WORLD_STATE.md, CHAPTER_ONE.md, and TIME_SYSTEM.md.
 
 ---
 
@@ -84,7 +86,7 @@ Creatures are not monsters. They are the ecological consequence of Harrow's Cros
 ---
 
 #### THE SURVEYOR'S SHADOW
-**What it is**: A single entity. Appears only in Chapter 1's Night 3 (chapter climax). The original surveyor — the person who filed the false paperwork eleven years ago — present now as something that walks the boundary between the permitted land and the falsely claimed hollow, measuring. It does not attack. It witnesses.
+**What it is**: A single entity. First appears on Night 4 (pre-reckoning, witnesses only) and returns on Night 5 (chapter climax, marks or departs). The original surveyor — the person who filed the false paperwork eleven years ago — present now as something that walks the boundary between the permitted land and the falsely claimed hollow, measuring. It does not attack. It witnesses.
 
 **Spawn condition**: Pre-appearance on Night 4 (witnesses only, does not mark — regardless of DEBT level). Marking appearance on Night 5 (chapter climax). Intensity on Night 5 is determined by accumulated DEBT. A player who has been transparent (reported discrepancies, refused to sign the Compact's ratification, approved Dix's inspection) faces a Surveyor that witnesses and departs. A player who has compounded the falsification faces a Surveyor that witnesses — and marks.
 
@@ -97,7 +99,7 @@ Creatures are not monsters. They are the ecological consequence of Harrow's Cros
 - If THE DEBT is high (player compounded the falsification): the Surveyor marks the Zone 5 boundary. The mark means Zone 5 becomes accessible on Chapter 2 Day 1 — the hollow is now open. What is in it is Chapter 2's horror.
 - If THE DEBT is low (player chose transparency): the Surveyor completes its walk and does not mark. Zone 5 remains closed. Chapter 2 begins with the false dawn anchor (the NPC investment anchor from CHAPTER_ONE.md).
 
-**Counter**: There is no counter. The Surveyor cannot be blocked, redirected, or deterred. The only relevant action is what the player chose during Days 1–3. By Night 3, the accounting is done.
+**Counter**: There is no counter. The Surveyor cannot be blocked, redirected, or deterred. The only relevant action is what the player chose during Days 1–5. By Night 5, the accounting is done.
 
 **Pillar compliance**: The Surveyor is Earned Dread at chapter scale. The player who played well faces a horror that witnesses and leaves. The player who compounded the lie faces the same entity — but it marks what they built. The macro choice weight lands because every micro and mid choice has already accumulated.
 
@@ -180,7 +182,7 @@ Day is not just preparation. It is the only time the township grows. Night canno
 
 **Structural expansion**: New buildings extend the township's capacity — more NPCs housed, more resources processed, more defenses possible. Each new building is also a new potential Walker target and a new moral choice about who builds it, where, and what that placement means for the hollow's reach.
 
-**Knowledge accumulation**: The player learns THE DEBT's rules through night observation. Night 1 teaches the Walker's movement pattern. Night 2 reveals the Watcher's compounding behavior. By Night 3, a player who has paid attention knows what will happen. They still cannot stop the Surveyor. They know, and they watch.
+**Knowledge accumulation**: The player learns THE DEBT's rules through night observation. Night 1 teaches the Walker's movement pattern. Night 2 reveals the Watcher's compounding behavior. By Night 3 a player who has paid attention knows what will happen. When the Surveyor first appears on Night 4, they cannot stop it. They know, and they watch.
 
 **NPC investment**: Named NPCs who survive nights become more capable — not through stat increases, but through behavioral arc progression. Elias who reported the treeline and was believed becomes a different watchman than Elias who reported and was ignored. Ruth who spoke about the ledger becomes a different foreman than Ruth who stayed silent. These are arc states, not upgrades. The player cannot grind an NPC into a combat asset. They can only give them conditions to change.
 
@@ -247,7 +249,7 @@ This document introduces new mechanics that require additions to frozen docs. Th
 |----------|------------------|
 | `WORLD_STATE.md` | Add creature definitions to Section 2 (The Horror). DEBT now has physical manifestations: Walkers, Watchers, Surveyor. Causal grammar table expands to include creature spawn conditions. |
 | `ARCHITECTURE.md` | Night Event Queue must include creature position/movement data alongside narrative events. Horror Agent output schema needs: `creature_type`, `current_zone`, `target_type` (structure or NPC arc). |
-| `CHAPTER_ONE.md` | Beat structure Night 1/2/3 sections need creature presence noted. Night 3 must specify Surveyor walk as the chapter-end trigger. |
+| `CHAPTER_ONE.md` | Beat structure Night 1–5 sections need creature presence noted. Night 4 must specify the Surveyor pre-appearance (witnesses only); Night 5 must specify the Surveyor's marking/departing walk as the chapter-end trigger. |
 | `GRAPHICS.md` | Walker, Watcher (non-physical), and Surveyor visual design needed. Walker: silhouette, no face, moves like something that was a tree. Watcher: environmental only (flickering light, misplaced tools — not a visible entity). Surveyor: a human figure at the treeline, seen from distance. Always at the boundary. Never closer. |
 | `INTERACTION_MODEL.md` | Night watch assignment UI: player must be able to assign NPCs to posts in the last 30 minutes of day phase. This is a new UI surface — the night watch roster. Post assignment locks at dusk. |
 | `WORLD_BACKSTORY.md` | NPC arrival backstories feed the behavioral state line on day 1. Each NPC's "what they are trying to get back to" is a voice register constraint — it surfaces in how they speak about their work. |

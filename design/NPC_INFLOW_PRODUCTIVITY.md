@@ -1,9 +1,11 @@
 # NPC Inflow & Productivity System — Hollow Township
 
-> Status: IN PROGRESS (2026-04-26). Extends WORLD_BACKSTORY.md inflow mechanic.
+> Status: FROZEN (reviewed 2026-06-13). Extends WORLD_BACKSTORY.md inflow mechanic.
 > Reference model: Fallout Shelter (skill matching, room assignment, settling curves, risk/reward).
 > Adapted for Hollow Township's pillar constraints — no stat bars, no happiness meters, no optimal play paths.
-> Pending review before freeze.
+> Reviewed against all five pillars (table below) and the frozen docs — compliant and consistent.
+> Fixed in review: bond-depth note corrected from the deprecated 3-day arc to the 5-day arc
+> (depth 4 is reachable in Chapter 1 for a pair held together from Day 1).
 
 ---
 
@@ -179,7 +181,7 @@ Ruth + Construction arrival in Zone 4 for 2 days:
 
 **Bond cost**: A bond makes both NPCs vulnerable to each other's loss. If a bonded NPC dies or breaks, the surviving NPC's arc takes a destabilization hit proportional to the bond depth. The game does not warn the player that bonds create vulnerability. They observe it when it happens.
 
-**Bond depth**: Bonds deepen with each additional consecutive day of shared work. Maximum depth at 4 days (Chapter 1 has 3 days — Deep bonds form in Chapter 2+). Deeper bonds have stronger productivity bonuses and stronger destabilization costs.
+**Bond depth**: Bonds deepen with each additional consecutive day of shared work. Maximum depth at 4 consecutive days. Over the 5-day Chapter 1 arc, a pair co-assigned from Day 1 can reach depth 4 by Day 5 — so the deepest bonds (and their strongest destabilization costs) are reachable within Chapter 1, though only for pairs the player held together every day. Deeper bonds have stronger productivity bonuses and stronger destabilization costs.
 
 ### Bond and Moral Weight
 
