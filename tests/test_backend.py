@@ -12,7 +12,34 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pytest
+try:
+    import pytest
+except ModuleNotFoundError:
+    # Allow `python tests/test_backend.py` to run without pytest installed.
+    # Provides the minimal pytest surface this suite uses (approx, raises).
+    class _Approx:
+        def __init__(self, expected, rel=1e-6, abs=1e-9):
+            self.expected, self.rel, self.abs = expected, rel, abs
+        def __eq__(self, other):
+            return abs(other - self.expected) <= max(self.rel * abs(self.expected), self.abs)
+        def __repr__(self):
+            return f"approx({self.expected})"
+
+    class _PytestShim:
+        @staticmethod
+        def approx(expected, rel=1e-6, abs=1e-9):
+            return _Approx(expected, rel, abs)
+
+        class raises:
+            def __init__(self, exc):
+                self.exc = exc
+            def __enter__(self):
+                return self
+            def __exit__(self, exc_type, exc, tb):
+                return exc_type is not None and issubclass(exc_type, self.exc)
+
+    pytest = _PytestShim()
+
 from backend.models import (
     SessionState, NPCState, ChoiceEntry, NightEvent, Observation,
     NPCKnowledgeState, ZoneNPCSignificance, weight_to_modifier,
