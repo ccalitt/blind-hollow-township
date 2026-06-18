@@ -39,6 +39,10 @@ func _ready() -> void:
 	_build_build_menu()
 	_build_context_panel()
 
+	_log_line("Harrow's Crossing. Morning. The mill is running.", false)
+	_log_line("The handover ledger is on the table. Fourteen names.", true)
+	_log_line("Click an NPC to assign them. WASD to pan. Scroll to zoom.", true)
+
 	EventBus.npc_selected.connect(_on_npc_selected)
 	EventBus.faction_rep_selected.connect(_on_faction_rep_selected)
 	EventBus.selection_cleared.connect(_hide_context)

@@ -74,12 +74,16 @@ func _handle_rotate(delta: float) -> void:
 
 
 func _apply_zoom() -> void:
-	_arm.position = Vector3(0, 0, _zoom)
+	# Elevate the camera based on current pitch so it looks down at the scene.
+	var p := deg_to_rad(_target_pitch)
+	_arm.position = Vector3(0, _zoom * sin(p), _zoom * cos(p))
 
 
 func _apply_pitch(deg: float) -> void:
-	# Arm tilts down toward the township; camera looks back along the arm.
 	_arm.rotation.x = -deg_to_rad(deg)
+	# Keep camera at correct elevation for the current pitch + zoom.
+	var p := deg_to_rad(deg)
+	_arm.position = Vector3(0, _zoom * sin(p), _zoom * cos(p))
 
 
 func _on_phase_changed(new_phase: int, _day: int) -> void:
