@@ -27,7 +27,7 @@ enum Phase { DAY, DUSK, NIGHT, DAWN }
 
 const PACES := {
 	"full": {Phase.DAY: 1500.0, Phase.DUSK: 180.0, Phase.NIGHT: 900.0, Phase.DAWN: 120.0},
-	"standard": {Phase.DAY: 540.0, Phase.DUSK: 70.0, Phase.NIGHT: 300.0, Phase.DAWN: 50.0},
+	"standard": {Phase.DAY: 420.0, Phase.DUSK: 60.0, Phase.NIGHT: 240.0, Phase.DAWN: 45.0},
 	"brisk": {Phase.DAY: 200.0, Phase.DUSK: 30.0, Phase.NIGHT: 110.0, Phase.DAWN: 26.0},
 }
 const PHASE_INGAME_HOURS := {Phase.DAY: 18, Phase.DUSK: 2, Phase.NIGHT: 10, Phase.DAWN: 2}
@@ -70,6 +70,12 @@ func duration(phase: int = -1) -> float:
 	var d: float = PACES.get(pace, PACES["standard"])[p]
 	if p == Phase.NIGHT:
 		d *= Chapter.night_length_multiplier()
+	elif p == Phase.DAWN and p == current_phase:
+		# Dawn lasts at least as long as the thread takes to land (two lines an entry).
+		var need := 7.0 + float(_dawn_entries.size()) * 3.9
+		if current_day >= Chapter.LAST_DAY:
+			need += 14.0
+		d = maxf(d, need)
 	return d
 
 

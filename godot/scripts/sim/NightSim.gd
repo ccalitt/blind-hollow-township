@@ -109,6 +109,8 @@ static func plan(day: int) -> void:
 		history[pid] = fx["history"][pid]
 	fx["history"] = history
 	fx["oil"] = ctx["lit"].size() * 2
+	fx["lit"] = ctx["lit"].duplicate()
+	fx["walker_target"] = _walker_target().get("post", "")
 	fx["walkers"] = ctx["walkers_after"]
 	fx["walker_queue"] = ctx["queue_after"]
 	fx["walker_paths"] = ctx["walker_paths"]
@@ -116,7 +118,9 @@ static func plan(day: int) -> void:
 	GameState.night_result = fx
 
 
-static func _context(day: int) -> Dictionary:
+## Which staffed posts have a lamp tonight: [lit, dark], each post_id -> npc_id.
+## There is oil for stock/2 lamps; posts are lit in roster order.
+static func lit_posts() -> Array:
 	var lamps := GameState.stock("oil") / 2
 	var lit := {}
 	var dark := {}
@@ -129,6 +133,13 @@ static func _context(day: int) -> Dictionary:
 			lit[pid] = who
 		else:
 			dark[pid] = who
+	return [lit, dark]
+
+
+static func _context(day: int) -> Dictionary:
+	var both := lit_posts()
+	var lit: Dictionary = both[0]
+	var dark: Dictionary = both[1]
 	var arc := {}
 	for id in GameState.npc_states:
 		arc[id] = GameState.arc_rank(str(GameState.npc_states[id]["arc_state"]))

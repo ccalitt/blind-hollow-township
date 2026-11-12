@@ -296,7 +296,7 @@ static func posts() -> Array:
 		{"id": "post_mill", "name": "Mill Quarter, the stores", "zone_id": "zone_1", "kind": "guard", "hands": true},
 		{"id": "post_common", "name": "Settlement Common, the lamp round", "zone_id": "zone_2", "kind": "guard", "hands": true},
 		{"id": "post_ledger", "name": "Manager's post, the ledger table", "zone_id": "zone_2", "kind": "guard", "hands": false},
-		{"id": "post_road", "name": "North road, where it ends", "zone_id": "zone_2", "kind": "perimeter", "hands": false},
+		{"id": "post_road", "name": "The road, where it ends", "zone_id": "zone_2", "kind": "perimeter", "hands": false},
 		{"id": "post_race", "name": "Mill race, the footbridge", "zone_id": "zone_1", "kind": "perimeter", "hands": false},
 		{"id": "post_eastcut", "name": "Eastern cut line, below the ridge", "zone_id": "zone_3", "kind": "perimeter", "hands": false},
 		{"id": "post_stumps", "name": "Southern stump field", "zone_id": "zone_4", "kind": "perimeter", "hands": false},
@@ -590,6 +590,8 @@ static func _assignment_text(id: String) -> String:
 	var n: Dictionary = GameState.npc_states[id]
 	if id == "constance":
 		return "Settlement Common"
+	if bool(n["is_arrival"]) and not bool(n["role_assigned"]):
+		return "Where the road ends"
 	if id == "peder" and not GameState.crew_order.is_empty():
 		return str(GameState.crew_order.get("label", "With the crew"))
 	for a in Content.DAY_ASSIGNMENTS:
