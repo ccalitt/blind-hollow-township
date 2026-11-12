@@ -6,10 +6,10 @@ config_version=5
 
 [application]
 
-config/name="Hollow Township — Vertical Slice"
-config/description="Chapter 1 Day->Night->Dawn loop. Offline prototype: authored night events stand in for the LLM Horror Agent."
+config/name="Hollow Township"
+config/description="Chapter One: Harrow's Crossing. Five days, five nights. Offline build: authored rule passes stand in for the LLM agents."
 run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -17,6 +17,8 @@ config/icon="res://icon.svg"
 EventBus="*res://scripts/autoload/EventBus.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 TimeManager="*res://scripts/autoload/TimeManager.gd"
+Audio="*res://scripts/autoload/Audio.gd"
+SaveSystem="*res://scripts/autoload/SaveSystem.gd"
 
 [display]
 
@@ -99,5 +101,9 @@ debug_skip_phase={
 }
 
 [rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=1
 
 environment/defaults/default_clear_color=Color(0.07, 0.08, 0.1, 1)

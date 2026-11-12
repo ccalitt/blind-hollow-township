@@ -1,278 +1,243 @@
 extends Node
-## TimeManager — the phase clock (Autoload singleton), per TIME_SYSTEM.md.
+## TimeManager — the phase clock and the session director (Autoload singleton).
 ##
-## Drives Day -> Dusk -> Night -> Dawn. Everything else subscribes to its signals
-## (relayed through EventBus). Nothing else manages time.
+## Drives Day -> Dusk -> Night -> Dawn (TIME_SYSTEM.md) and, at each boundary, runs
+## the same pass order as backend/engine.py SessionEngine through Chapter.gd:
 ##
-## Pillar 4 (Day/Night as Structural Argument): this clock IS the mechanical
-## implementation of RELIEF (day) -> UNEASE (night) -> COMPULSION (dawn).
+##   DAY    Chapter.begin_day / tick_day      player choices land in the choice log
+##   DUSK   Chapter.begin_dusk                roster open; one warning before it locks
+##   NIGHT  Chapter.begin_night               crew + production resolve, gossip pass,
+##                                            NightSim.plan -> the night queue
+##          (queue served by in-game hour -> EventBus.night_event_fired)
+##   DAWN   Chapter.begin_dawn                night committed, significance pass,
+##                                            consequence thread, investment anchor
 ##
-## PAUSE MODEL (CRITICAL_GAPS_PLAN.md Gap 5): pause is permitted. It freezes the
-## clock and stops *pending* events from arriving, but it does NOT undo anything
-## already seen and it does NOT make the night safe. We implement this by gating
-## elapsed-time accumulation on `_paused`; the world stays fully visible.
+## Pillar 4: this clock IS the argument — RELIEF (day), UNEASE (night), COMPULSION (dawn).
 ##
-## SLICE NOTE: TIME_SYSTEM.md specifies 45-minute real cycles (DAY 1500s, DUSK 180s,
-## NIGHT 900s, DAWN 120s). For a playable/inspectable vertical slice those are far
-## too long to sit through, so SLICE_DURATIONS are compressed by ~20x. The real
-## spec values are kept in SPEC_DURATIONS for reference and the ratio between phases
-## is preserved. Press F1 (debug_skip_phase) to advance instantly. Documented in README.
+## PAUSE (Gap 5): pausing freezes the SceneTree. This node is pausable, so the clock
+## stops and pending night events are held; delivered text stays; the world stays
+## visible. Nothing about a paused night is safe, and nothing is undone.
+##
+## PACE: the spec cycle is 25/3/15/2 real minutes (kept as "full"). The default
+## "standard" pace compresses it for the amount of authored content this build has;
+## phase ratios are preserved. There is no speed control in play (TIME_SYSTEM.md).
+## Night length scales with the season (Late Summer -15%, Deep Winter +25%).
 
 enum Phase { DAY, DUSK, NIGHT, DAWN }
-enum Season { LATE_SUMMER, TURNING, DEEP_WINTER, THAW }
 
-# Real spec (TIME_SYSTEM.md) — not used to time the slice, kept for fidelity.
-const SPEC_DURATIONS := {
-	Phase.DAY: 1500.0,
-	Phase.DUSK: 180.0,
-	Phase.NIGHT: 900.0,
-	Phase.DAWN: 120.0,
+const PACES := {
+	"full": {Phase.DAY: 1500.0, Phase.DUSK: 180.0, Phase.NIGHT: 900.0, Phase.DAWN: 120.0},
+	"standard": {Phase.DAY: 540.0, Phase.DUSK: 70.0, Phase.NIGHT: 300.0, Phase.DAWN: 50.0},
+	"brisk": {Phase.DAY: 200.0, Phase.DUSK: 30.0, Phase.NIGHT: 110.0, Phase.DAWN: 26.0},
 }
+const PHASE_INGAME_HOURS := {Phase.DAY: 18, Phase.DUSK: 2, Phase.NIGHT: 10, Phase.DAWN: 2}
+const PHASE_NAMES := ["day", "dusk", "night", "dawn"]
 
-# Compressed durations actually used by the slice (~20x faster), same phase ratio.
-const SLICE_DURATIONS := {
-	Phase.DAY: 75.0,
-	Phase.DUSK: 9.0,
-	Phase.NIGHT: 45.0,
-	Phase.DAWN: 8.0,
-}
-
-# In-game hours per phase (for the sun/hour tick) — unchanged from spec.
-const PHASE_INGAME_HOURS := {
-	Phase.DAY: 18,
-	Phase.DUSK: 2,
-	Phase.NIGHT: 10,
-	Phase.DAWN: 2,
-}
-
-# Season tempo multipliers (TIME_SYSTEM.md). debt_tempo scales clock speed.
-const SEASON_TEMPO := {
-	Season.LATE_SUMMER: 0.8,
-	Season.TURNING: 1.0,
-	Season.DEEP_WINTER: 1.3,
-	Season.THAW: 0.9,
-}
-
-# Dawn delay before the consequence thread is delivered (TIME_SYSTEM: 60s in spec).
-# Compressed for the slice so the player isn't staring at a frozen dawn.
-const DAWN_THREAD_DELAY := 3.0
-
-const LAST_CHAPTER_DAY := 5
-
-# Direct, non-EventBus signals (some systems prefer to bind these directly).
 signal phase_changed(new_phase: int)
-signal hour_ticked(current_hour: int, phase: int)
-signal night_roster_lock_warning()
 signal dawn_consequence_ready()
-signal season_changed(new_season: int, severity: float)
 
+var pace: String = "standard"
 var current_phase: int = Phase.DAY
 var current_day: int = 1
-var current_season: int = Season.LATE_SUMMER
-var debt_tempo: float = 0.8
 var elapsed_in_phase: float = 0.0
+## True while dawn is still delivering its thread: no input is accepted (REVEAL_MECHANIC §2).
+var input_locked: bool = false
 
-var _paused: bool = false
 var _running: bool = false
-var _last_emitted_hour: int = -1
-var _warned_for_dusk: bool = false
+var _last_hour: int = -1
+var _warned: bool = false
+var _night_cursor: int = 0
+var _dawn_delivered: bool = false
+var _dawn_entries: Array = []
+var _ended: bool = false
+var debug_keys: bool = false
 
 
 func _ready() -> void:
-	EventBus.pause_toggled.connect(_on_pause_toggled)
-
-
-## Begin the clock. Called by Main once the world + UI are wired.
-func start() -> void:
-	_running = true
-	current_phase = Phase.DAY
-	current_day = 1
-	GameState.current_day = current_day
-	GameState.current_phase = "day"
-	_emit_phase()
-
-
-func _process(delta: float) -> void:
-	if not _running or _paused:
-		return
-	elapsed_in_phase += delta * debt_tempo
-	_tick_hour()
-
-	# Single "night is coming" cue 60 spec-seconds (scaled) before dusk closes.
-	if current_phase == Phase.DUSK and not _warned_for_dusk:
-		var warn_at := SLICE_DURATIONS[Phase.DUSK] * 0.5
-		if elapsed_in_phase >= warn_at:
-			_warned_for_dusk = true
-			night_roster_lock_warning.emit()
-			EventBus.night_roster_lock_warning.emit()
-
-	if elapsed_in_phase >= SLICE_DURATIONS[current_phase]:
-		_advance_phase()
-
-
-# ── Phase advance ───────────────────────────────────────────────────────────
-
-func _advance_phase() -> void:
-	elapsed_in_phase = 0.0
-	_last_emitted_hour = -1
-	match current_phase:
-		Phase.DAY:
-			current_phase = Phase.DUSK
-			_on_dusk_begin()
-		Phase.DUSK:
-			current_phase = Phase.NIGHT
-			_on_night_begin()
-		Phase.NIGHT:
-			current_phase = Phase.DAWN
-			_on_dawn_begin()
-		Phase.DAWN:
-			# Dawn rolls into the next Day.
-			if current_day >= LAST_CHAPTER_DAY:
-				_running = false
-				current_phase = Phase.DAWN  # hold on final dawn — chapter end
-				_emit_phase()
-				return
-			current_phase = Phase.DAY
-			current_day += 1
-			_on_day_begin()
-	_emit_phase()
-
-
-func _emit_phase() -> void:
-	GameState.current_phase = _phase_name(current_phase)
-	GameState.current_day = current_day
-	phase_changed.emit(current_phase)
-	EventBus.phase_changed.emit(current_phase, current_day)
-
-
-# ── Phase handlers ────────────────────────────────────────────────────────────
-
-func _on_dusk_begin() -> void:
-	# Dusk: roster opens. In the slice, the day's choices are frozen into the roster.
-	_warned_for_dusk = false
-	GameState.current_phase = "dusk"
-
-
-func _on_night_begin() -> void:
-	# Night: lock assignments, run gossip + select authored night events, observe-only.
-	GameState.current_phase = "night"
-	GameState.night_roster = _build_night_roster()
-	# Systems node (Main child) listens for phase_changed==NIGHT to run the passes.
-
-
-func _on_dawn_begin() -> void:
-	# Dawn: night freezes, significance + consequence thread run, then deliver after delay.
-	GameState.current_phase = "dawn"
-	# The systems layer runs significance/thread on phase_changed==DAWN, then we
-	# deliver the thread after the (compressed) consequence delay.
-	_deliver_dawn_thread_after_delay()
-
-
-func _on_day_begin() -> void:
-	GameState.current_phase = "day"
-	# Re-evaluate season at each new day (DEBT-driven, TIME_SYSTEM.md).
-	_evaluate_season()
-
-
-func _deliver_dawn_thread_after_delay() -> void:
-	await get_tree().create_timer(DAWN_THREAD_DELAY).timeout
-	if current_phase != Phase.DAWN:
-		return
-	dawn_consequence_ready.emit()
-	# The systems layer assembled GameState's thread entries; broadcast them.
-	EventBus.dawn_thread_ready.emit(GameState.get_meta("dawn_thread_entries", []))
-
-
-# ── Roster: freeze each NPC's current assignment as the night roster ────────
-
-func _build_night_roster() -> Dictionary:
-	var roster: Dictionary = {}
-	for npc_id in GameState.npc_states:
-		roster[npc_id] = GameState.npc_states[npc_id].get("zone", "zone_2")
-	return roster
-
-
-# ── Season evaluation (TIME_SYSTEM.md SeasonManager) ────────────────────────
-
-func _evaluate_season() -> void:
-	var debt := GameState.get_debt_level()
-	var target := _compute_target_season(current_day, debt)
-	if target != current_season:
-		current_season = target
-		var severity := clampf(debt, 0.0, 1.0)
-		debt_tempo = SEASON_TEMPO[target]
-		GameState.season = _season_name(target)
-		season_changed.emit(target, severity)
-	else:
-		debt_tempo = SEASON_TEMPO[current_season]
-
-
-func _compute_target_season(day: int, debt: float) -> int:
-	# Thresholds per TIME_SYSTEM.md SEASON_THRESHOLDS (5-day arc). Turning can arrive
-	# from Day 3 on the high-DEBT path; Deep Winter only Night 5 at high DEBT.
-	if day >= 5 and debt >= 0.70:
-		return Season.DEEP_WINTER
-	if day >= 3 and debt >= 0.40:
-		return Season.TURNING
-	return Season.LATE_SUMMER
-
-
-# ── Hour tick (drives sun position / light lerp in the world) ───────────────
-
-func _tick_hour() -> void:
-	var dur: float = SLICE_DURATIONS[current_phase]
-	var progress := elapsed_in_phase / dur if dur > 0.0 else 0.0
-	var hours: int = PHASE_INGAME_HOURS[current_phase]
-	var hour := int(progress * hours)
-	if hour != _last_emitted_hour:
-		_last_emitted_hour = hour
-		hour_ticked.emit(hour, current_phase)
-		EventBus.hour_ticked.emit(hour, current_phase)
-
-
-# ── Pause (Gap 5) ───────────────────────────────────────────────────────────
-
-func _on_pause_toggled(paused: bool) -> void:
-	_paused = paused
-
-
-func is_paused() -> bool:
-	return _paused
-
-
-# ── Debug skip (F1) — advance the current phase instantly ───────────────────
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("debug_skip_phase") and _running:
-		elapsed_in_phase = SLICE_DURATIONS[current_phase]
-
-
-# ── Progress accessors (0..1 within current phase) for UI/lighting ──────────
-
-func phase_progress() -> float:
-	var dur: float = SLICE_DURATIONS[current_phase]
-	return clampf(elapsed_in_phase / dur, 0.0, 1.0) if dur > 0.0 else 0.0
+	debug_keys = OS.has_feature("editor") or OS.get_cmdline_user_args().has("--debug-keys")
 
 
 func is_running() -> bool:
 	return _running
 
 
-# ── Name helpers ────────────────────────────────────────────────────────────
-
-func _phase_name(p: int) -> String:
-	match p:
-		Phase.DAY: return "day"
-		Phase.DUSK: return "dusk"
-		Phase.NIGHT: return "night"
-		Phase.DAWN: return "dawn"
-	return "day"
+func is_night() -> bool:
+	return current_phase == Phase.NIGHT
 
 
-func _season_name(s: int) -> String:
-	match s:
-		Season.LATE_SUMMER: return "late_summer"
-		Season.TURNING: return "turning"
-		Season.DEEP_WINTER: return "deep_winter"
-		Season.THAW: return "thaw"
-	return "late_summer"
+func duration(phase: int = -1) -> float:
+	var p := current_phase if phase < 0 else phase
+	var d: float = PACES.get(pace, PACES["standard"])[p]
+	if p == Phase.NIGHT:
+		d *= Chapter.night_length_multiplier()
+	return d
+
+
+func phase_progress() -> float:
+	return clampf(elapsed_in_phase / duration(), 0.0, 1.0)
+
+
+# ── Session start / resume ──────────────────────────────────────────────────
+
+func begin_new(anchor_name: String = "") -> void:
+	GameState.reset()
+	if anchor_name.strip_edges() != "":
+		GameState.anchor_name = anchor_name.strip_edges()
+	current_day = 1
+	current_phase = Phase.DAY
+	elapsed_in_phase = 0.0
+	_reset_cursors()
+	_running = true
+	_ended = false
+	EventBus.session_started.emit()
+	Chapter.begin_day(1)
+	_emit_phase()
+
+
+func to_dict() -> Dictionary:
+	return {"day": current_day, "phase": current_phase, "elapsed": elapsed_in_phase,
+		"night_cursor": _night_cursor, "pace": pace}
+
+
+func from_dict(d: Dictionary) -> void:
+	current_day = int(d.get("day", GameState.current_day))
+	current_phase = int(d.get("phase", Phase.DAY))
+	elapsed_in_phase = float(d.get("elapsed", 0.0))
+	_reset_cursors()
+	_night_cursor = int(d.get("night_cursor", 0))
+	# A dawn is short and its thread is already on record: resume it from its start.
+	if current_phase == Phase.DAWN:
+		elapsed_in_phase = 0.0
+		_dawn_entries = GameState.dawn_threads.get(current_day, [])
+		input_locked = true
+
+
+## Called after SaveSystem.load_game(): start the clock on the restored state.
+func resume() -> void:
+	_running = not GameState.chapter_complete or current_phase == Phase.DAWN
+	_ended = false
+	EventBus.session_started.emit()
+	_emit_phase()
+
+
+func stop() -> void:
+	_running = false
+
+
+func _reset_cursors() -> void:
+	_last_hour = -1
+	_warned = false
+	_night_cursor = 0
+	_dawn_delivered = false
+	_dawn_entries = []
+	input_locked = false
+
+
+# ── Tick ────────────────────────────────────────────────────────────────────
+
+func _process(delta: float) -> void:
+	if not _running:
+		return
+	elapsed_in_phase += delta
+	_tick_hour()
+	match current_phase:
+		Phase.DAY:
+			Chapter.tick_day(phase_progress())
+		Phase.DUSK:
+			# One cue, a third of the way from the end. No countdown anywhere.
+			if not _warned and elapsed_in_phase >= duration() * 0.66:
+				_warned = true
+				EventBus.night_roster_lock_warning.emit()
+		Phase.NIGHT:
+			_serve_night(phase_progress() * float(NightSim.NIGHT_HOURS))
+		Phase.DAWN:
+			if not _dawn_delivered and elapsed_in_phase >= minf(4.0, duration() * 0.2):
+				_dawn_delivered = true
+				dawn_consequence_ready.emit()
+				EventBus.dawn_thread_ready.emit(_dawn_entries)
+			if input_locked and elapsed_in_phase >= duration() * 0.5:
+				input_locked = false
+	if elapsed_in_phase >= duration():
+		_advance_phase()
+
+
+func _serve_night(hour: float) -> void:
+	var q: Array = GameState.night_queue
+	while _night_cursor < q.size() and float(q[_night_cursor]["hour"]) <= hour:
+		var e: Dictionary = q[_night_cursor]
+		_night_cursor += 1
+		GameState.add_log(str(e["event_text"]), "night")
+		EventBus.night_event_fired.emit(e)
+
+
+func _advance_phase() -> void:
+	elapsed_in_phase = 0.0
+	_last_hour = -1
+	match current_phase:
+		Phase.DAY:
+			current_phase = Phase.DUSK
+			_warned = false
+			Chapter.begin_dusk()
+		Phase.DUSK:
+			current_phase = Phase.NIGHT
+			_night_cursor = 0
+			Chapter.begin_night()
+			EventBus.night_began.emit(current_day)
+		Phase.NIGHT:
+			_serve_night(999.0)
+			current_phase = Phase.DAWN
+			_dawn_delivered = false
+			input_locked = true
+			_dawn_entries = Chapter.begin_dawn()
+		Phase.DAWN:
+			if not _dawn_delivered:
+				_dawn_delivered = true
+				EventBus.dawn_thread_ready.emit(_dawn_entries)
+			input_locked = false
+			if current_day >= Chapter.LAST_DAY:
+				_end_chapter()
+				return
+			current_phase = Phase.DAY
+			current_day += 1
+			Chapter.begin_day(current_day)
+	_emit_phase()
+
+
+func _end_chapter() -> void:
+	if _ended:
+		return
+	_ended = true
+	_running = false
+	GameState.chapter_complete = true
+	SaveSystem.write_handoff()
+	SaveSystem.enabled = SaveSystem.enabled
+	EventBus.chapter_ended.emit()
+
+
+func _emit_phase() -> void:
+	GameState.current_phase = PHASE_NAMES[current_phase]
+	GameState.current_day = current_day
+	phase_changed.emit(current_phase)
+	EventBus.phase_changed.emit(current_phase, current_day)
+	EventBus.world_changed.emit()
+
+
+## "Post the watch." — confirming the roster at dusk ends the dusk (NIGHT_SURVIVAL).
+func confirm_roster() -> void:
+	if _running and current_phase == Phase.DUSK:
+		elapsed_in_phase = duration()
+
+
+func _tick_hour() -> void:
+	var hours: int = PHASE_INGAME_HOURS[current_phase]
+	var hour := int(phase_progress() * hours)
+	if hour != _last_hour:
+		_last_hour = hour
+		EventBus.hour_ticked.emit(hour, current_phase)
+
+
+# ── Debug: F1 skips the current phase (editor builds or `-- --debug-keys`) ───
+
+func _unhandled_input(event: InputEvent) -> void:
+	if debug_keys and _running and event.is_action_pressed("debug_skip_phase"):
+		elapsed_in_phase = duration()
