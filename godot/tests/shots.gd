@@ -24,6 +24,7 @@ func _ready() -> void:
 		await _run_creatures()
 	elif scenario == "input":
 		await _run_input()
+		await _run_continue()
 	else:
 		await _run()
 	get_tree().quit()
@@ -386,4 +387,43 @@ func _run_input() -> void:
 	check(await click_button("Stop here for now"), "Stop here is clickable")
 	await wait(1.0)
 	check(not TimeManager.is_running() and main.title._root.visible, "back at the title")
+	print("INPUT FAILS: %d" % _fails)
+
+
+## Stop, then Continue: the one record is picked up exactly where it was left.
+func _run_continue() -> void:
+	SaveSystem.save_path = "user://test_shots.save"
+	SaveSystem.enabled = true
+	SaveSystem.delete_save()
+	main.title.show_title()
+	await wait(0.3)
+	check(find_button(main.title, "Continue") == null, "no Continue without a record")
+	await click_button("Begin")
+	await click_button("Go on")
+	await wait(1.5)
+	pick("peder", "crew_mill_reinforce")
+	Chapter.place_building("Storehouse", "zone_1", Vector2i(3, -3))
+	EventBus.world_changed.emit()
+	await set_progress(0.4)
+	var choices := GameState.choice_log.size()
+	var elapsed := TimeManager.elapsed_in_phase
+	await key(KEY_ESCAPE)
+	await click_button("Stop here for now")
+	await wait(0.8)
+	check(SaveSystem.has_save(), "stopping writes the record")
+	GameState.reset()
+	check(await click_button("Continue"), "Continue is offered")
+	await wait(1.5)
+	check(TimeManager.is_running() and GameState.choice_log.size() == choices, "choices restored (%d)" % GameState.choice_log.size())
+	check(GameState.buildings.size() == 1 and main.township._building_nodes.size() == 1, "the placed building is standing again")
+	check(TimeManager.elapsed_in_phase >= elapsed - 0.5, "the day resumes where it was left, not from its start")
+	check(main.ui._log_box.get_child_count() > 3, "the log is restored")
+	await shot("i2_continued")
+	await key(KEY_ESCAPE)
+	await click_button("Stop here for now")
+	await wait(0.5)
+	check(await click_button("Begin again"), "Begin again is offered once a record exists")
+	check(find_button(main.title, "The last record is not kept") != null, "…and asks twice before discarding it")
+	SaveSystem.delete_save()
+	SaveSystem.enabled = false
 	print("INPUT FAILS: %d" % _fails)

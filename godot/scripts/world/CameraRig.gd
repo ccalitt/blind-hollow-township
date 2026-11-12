@@ -67,7 +67,8 @@ func set_mode(m: int) -> void:
 	elif m == Mode.PLAYER:
 		_zoom_target = 30.0
 		_pitch_target = PITCH_NIGHT if TimeManager.is_night() else PITCH_DAY
-		position = Vector3(0.5, 0, -6.0)
+		# Framed so the township sits above the log and the hollow is in view to the west.
+		position = Vector3(-2.0, 0, -1.0)
 		_pivot.rotation.y = 0.0
 
 

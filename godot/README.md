@@ -7,6 +7,9 @@ what the player did during the day.
 
 > **Earned Dread** — *every right choice arrives already compromised.*
 
+![Day 1, Harrow's Crossing](../docs/screenshots/day.png)
+![Night 1, a lamp on the western side](../docs/screenshots/night.png)
+
 ---
 
 ## Run it
