@@ -828,6 +828,20 @@ static func _plan_people(day: int, ctx: Dictionary, groups: Array) -> void:
 			["ruth"], [str(pc.get("choice_id", ""))], "zone_2", 2, "none", {"focus": "zone_2"})
 		groups.append(g9)
 
+	# Night 5, three walls: the frost Ruth staked her word against. Traced to whatever
+	# took the crew off the wall — which, on the honest path, is the honesty.
+	if day == Chapter.LAST_DAY and GameState.structure_walls < 4 and GameState.npc_is_capable("ruth") \
+			and not GameState.has_flag("promise_broken"):
+		var fc := _wall_lost_cause()
+		if not fc.is_empty():
+			var g11 := _group(72)
+			g11["fx"]["flags"]["ruth_frost"] = day
+			g11["fx"]["arc"].append(["ruth", -1, str(fc["choice_id"])])
+			_ev(g11, 9.0, "The first frost came at the third watch. The incomplete structure has three walls. Ruth Callan walked out to it and stood where the fourth would be.",
+				"Ruth Callan stood where the fourth wall would be when the frost came. She had told the Association before first frost.",
+				["ruth"], [str(fc["choice_id"])], "zone_4", 2, "none", {"focus": "post_structure"})
+			groups.append(g11)
+
 	# Maren under fear moves it outward to whoever she was last near (gossip pass).
 	for tr in GameState.get_meta("gossip_transfers", []):
 		if int(tr["day"]) == day and str(tr["from_npc"]) == "maren":
@@ -848,6 +862,25 @@ static func _plan_people(day: int, ctx: Dictionary, groups: Array) -> void:
 				[to, "maren"], [str(lc["choice_id"])], "zone_2", 1, "none", {"focus": "zone_2"})
 			groups.append(g10)
 			break
+
+
+## The choice that most plainly kept the fourth wall from going up.
+static func _wall_lost_cause() -> Dictionary:
+	var c: Dictionary = GameState.find_choice("peder_foundation_left")
+	if not c.is_empty():
+		return c
+	# The Compact pulled the crew: the latest act that made it do so.
+	var latest: Dictionary = {}
+	for ch in GameState.choice_log:
+		if str(ch["action_type"]) in ["association_ledger_unedited", "dix_inspection_approved",
+				"compact_ask_survey_history", "discrepancy_logged", "macro_withdraw", "macro_true_count", "macro_carry_self"]:
+			latest = ch
+	if not latest.is_empty():
+		return latest
+	for ch in GameState.choice_log:
+		if str(ch["action_type"]).begins_with("crew_") and str(ch["action_type"]) != "crew_fourth_wall":
+			latest = ch
+	return latest
 
 
 # ── The Surveyor's Shadow ───────────────────────────────────────────────────

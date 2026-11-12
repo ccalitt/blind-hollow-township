@@ -37,6 +37,13 @@ Named: **Earned Dread**. This is the game's soul. Every feature must serve it or
 | `design/WORLD_BACKSTORY.md` | Trap mythology, NPC arrival backstories, inflow mechanic, escape theories, FROM-inspired layer | FROZEN (reviewed 2026-06-13) |
 | `design/TIME_SYSTEM.md` | Day/night/season timer logic, Godot implementation, GoT-inspired debt-driven seasonal clock | IN PROGRESS (reviewed 2026-06-13) — pillar-compliant; blocked on season-formula vs. Season-Map inconsistency (author decision) |
 | `design/NPC_INFLOW_PRODUCTIVITY.md` | Fallout Shelter-inspired NPC skill matching, settling curves, bonding, silver lining productivity system | FROZEN (reviewed 2026-06-13) |
+| `design/CHAPTER_ONE_BUILD_NOTES.md` | Decisions taken while building the playable Chapter 1 where frozen docs were silent or in conflict, each pillar-tagged | IMPLEMENTATION NOTES — not frozen; section A lists conflicts awaiting author decision |
+
+## The Build
+
+`godot/` holds the playable, offline Chapter 1 (five days, five nights). See `godot/README.md`.
+Rules live in `godot/scripts/sim/` (no Nodes; headless-testable); run the contract tests with
+`godot --headless --path godot res://tests/TestRunner.tscn` before changing them.
 
 ## Working Branch
 

@@ -22,6 +22,7 @@ func _ready() -> void:
 	for s in range(1, 41):
 		_play("random", s)
 	_test_save_roundtrip()
+	_test_save_file()
 	_test_season_map()
 	_test_static_text()
 	print("")
@@ -499,3 +500,53 @@ func _test_static_text() -> void:
 	for id in DawnThread.FINAL_LINES:
 		for k in DawnThread.FINAL_LINES[id]:
 			_check_banned("final", 0, str(DawnThread.FINAL_LINES[id][k]))
+
+
+## The real file path: begin a session through TimeManager, write it, wreck the
+## state, read it back. Uses its own file so a developer's record is never touched.
+func _test_save_file() -> void:
+	SaveSystem.save_path = "user://test_chapter1.save"
+	SaveSystem.handoff_path = "user://test_chapter1_handoff.json"
+	SaveSystem.enabled = true
+	SaveSystem.delete_save()
+	ok(not SaveSystem.has_save(), "save file: starts absent")
+	TimeManager.begin_new("Someone Else")
+	pick("elias", "elias_report_logged")
+	pick("peder", "crew_fourth_wall")
+	Chapter.place_building("Watchtower", "zone_4", Vector2i(-7, 3))
+	Chapter.tick_day(1.0)
+	Chapter.begin_dusk()
+	Chapter.set_post("post_b1", "ruth")
+	TimeManager.current_phase = TimeManager.Phase.NIGHT
+	Chapter.begin_night()
+	TimeManager.elapsed_in_phase = 31.5
+	SaveSystem.save()
+	ok(SaveSystem.has_save(), "save file: written")
+	ok(not SaveSystem.save_is_finished(), "save file: not marked finished mid-chapter")
+	var before := var_to_str(GameState.to_dict())
+	var queue_before: int = GameState.night_queue.size()
+	GameState.reset()
+	TimeManager.stop()
+	ok(SaveSystem.load_game(), "save file: loads")
+	ok(var_to_str(GameState.to_dict()) == before, "save file: state identical after load")
+	ok(GameState.anchor_name == "Someone Else", "save file: anchor name kept")
+	ok(TimeManager.current_phase == TimeManager.Phase.NIGHT and absf(TimeManager.elapsed_in_phase - 31.5) < 0.01, "save file: clock restored mid-night")
+	ok(GameState.night_queue.size() == queue_before and queue_before > 0, "save file: tonight's queue survives (the night cannot be re-rolled)")
+	# Finish the chapter and check the handoff is written.
+	TimeManager.stop()
+	Chapter.begin_dawn()
+	for day in range(2, 6):
+		Chapter.begin_day(day)
+		Chapter.tick_day(1.0)
+		Chapter.begin_dusk()
+		Chapter.begin_night()
+		Chapter.begin_dawn()
+	SaveSystem.write_handoff()
+	ok(FileAccess.file_exists(SaveSystem.handoff_path), "handoff: written at chapter end")
+	var f := FileAccess.open(SaveSystem.handoff_path, FileAccess.READ)
+	var parsed: Variant = JSON.parse_string(f.get_as_text())
+	f.close()
+	ok(typeof(parsed) == TYPE_DICTIONARY and parsed.has("chapter_1_investment_anchor") and parsed.has("chapter_2_debt_floor"), "handoff: carries the anchor and the Chapter 2 debt floor")
+	SaveSystem.delete_save()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(SaveSystem.handoff_path))
+	SaveSystem.enabled = false

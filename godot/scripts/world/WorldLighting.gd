@@ -16,7 +16,7 @@ const DUSK := {"key": Color(0.98, 0.58, 0.36), "energy": 0.85, "ambient": Color(
 const NIGHT := {"key": Color(0.46, 0.54, 0.72), "energy": 0.62, "ambient": Color(0.20, 0.24, 0.36), "amb_e": 0.70,
 	"bg": Color(0.06, 0.075, 0.115), "fog": Color(0.08, 0.10, 0.16), "fog_d": 0.006, "sat": 0.55}
 const DAWN := {"key": Color(0.76, 0.76, 0.78), "energy": 0.75, "ambient": Color(0.52, 0.54, 0.60), "amb_e": 0.50,
-	"bg": Color(0.44, 0.46, 0.50), "fog": Color(0.56, 0.58, 0.62), "fog_d": 0.011, "sat": 0.62}
+	"bg": Color(0.44, 0.46, 0.50), "fog": Color(0.56, 0.58, 0.62), "fog_d": 0.0065, "sat": 0.62}
 const TITLE := {"key": Color(0.80, 0.52, 0.38), "energy": 0.6, "ambient": Color(0.30, 0.30, 0.40), "amb_e": 0.5,
 	"bg": Color(0.16, 0.15, 0.20), "fog": Color(0.22, 0.20, 0.26), "fog_d": 0.013, "sat": 0.62}
 
@@ -70,7 +70,8 @@ func _target() -> Dictionary:
 			t["sat"] = float(t["sat"]) * 0.82
 			t["key"] = (t["key"] as Color).lerp(Color(0.80, 0.74, 0.56), 0.35)
 		"deep_winter":
-			t["fog_d"] = float(t["fog_d"]) * 2.0
+			t["fog_d"] = float(t["fog_d"]) * 1.8
+			t["fog"] = (t["fog"] as Color).lerp(Color(0.42, 0.46, 0.54), 0.45)
 			t["sat"] = float(t["sat"]) * 0.58
 			t["key"] = (t["key"] as Color).lerp(Color(0.55, 0.60, 0.75), 0.6)
 			t["energy"] = float(t["energy"]) * 0.85

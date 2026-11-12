@@ -46,6 +46,7 @@ const OPENING := [
 	"The handover ledger is on the table in the manager's post. Fourteen names. Three columns of counts.",
 	"One line of handover note: see to the structure first.",
 	"Across thirty yards of cleared ground, the incomplete building's frame catches the light. Three of its walls are standing.",
+	"Peder Lund's crew is at the frame, waiting on an order. Elias Grout is down from the ridge with a report in his hand.",
 ]
 
 # ── Arrivals (NPC_INFLOW_PRODUCTIVITY / WORLD_BACKSTORY) ────────────────────

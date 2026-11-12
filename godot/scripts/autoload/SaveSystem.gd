@@ -9,8 +9,8 @@ extends Node
 ## At the end of Chapter 1 the state Chapter 2 inherits is written beside it
 ## (CHAPTER_ONE "Required Output" — silent, never shown to the player).
 
-const SAVE_PATH := "user://chapter1.save"
-const HANDOFF_PATH := "user://chapter1_handoff.json"
+var save_path := "user://chapter1.save"
+var handoff_path := "user://chapter1_handoff.json"
 const SETTINGS_PATH := "user://settings.cfg"
 const VERSION := 3
 
@@ -39,7 +39,7 @@ func _notification(what: int) -> void:
 
 
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	return FileAccess.file_exists(save_path)
 
 
 func save_is_finished() -> bool:
@@ -50,7 +50,7 @@ func save_is_finished() -> bool:
 func save() -> void:
 	if not enabled or not TimeManager.is_running():
 		return
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(save_path, FileAccess.WRITE)
 	if f == null:
 		return
 	f.store_var({"version": VERSION, "state": GameState.to_dict(), "clock": TimeManager.to_dict()})
@@ -60,7 +60,7 @@ func save() -> void:
 func _read() -> Dictionary:
 	if not has_save():
 		return {}
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var f := FileAccess.open(save_path, FileAccess.READ)
 	if f == null:
 		return {}
 	var v: Variant = f.get_var()
@@ -82,13 +82,13 @@ func load_game() -> bool:
 
 func delete_save() -> void:
 	if has_save():
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 
 
 func write_handoff() -> void:
 	if not enabled:
 		return
-	var f := FileAccess.open(HANDOFF_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(handoff_path, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(Chapter.handoff(), "  "))
 		f.close()

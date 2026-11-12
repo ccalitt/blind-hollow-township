@@ -858,7 +858,7 @@ func _update_walkers_night(hour: float) -> void:
 func _build_surveyor() -> void:
 	_surveyor = MeshInstance3D.new()
 	var quad := QuadMesh.new()
-	quad.size = Vector2(Art.W, Art.H) * 0.085
+	quad.size = Vector2(Art.W, Art.H) * 0.105
 	_surveyor.mesh = quad
 	_surveyor_mat = StandardMaterial3D.new()
 	_surveyor_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -928,7 +928,7 @@ func _update_surveyor(hour: float) -> void:
 			else:
 				alpha = clampf(1.0 - after / 0.35, 0.0, 1.0)
 	_surveyor.visible = alpha > 0.01 and hour >= 5.2
-	_surveyor.position = pos + Vector3(0, Art.H * 0.085 * 0.5, 0)
+	_surveyor.position = pos + Vector3(0, Art.H * 0.105 * 0.5, 0)
 	_surveyor_mat.albedo_color = Color(1, 1, 1, alpha)
 	if _surveyor_state != frame:
 		_surveyor_state = frame

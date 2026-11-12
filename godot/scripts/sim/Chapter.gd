@@ -1245,7 +1245,7 @@ static func _do_macro(id: String, by_default: bool) -> void:
 			GameState.adjust_faction("compact", -0.30, "The manager is the county's source.")
 			GameState.set_flag("dix_returns")
 		"macro_silence":
-			var c7 := GameState.log_choice(id, "macro", ["constance"], payload, 0.20)
+			var c7 := GameState.log_choice(id, "macro", ["constance"], payload, 0.15)
 			if spoke:
 				GameState.shift_arc("constance", -1, str(c7["choice_id"]))
 		"macro_refuse_filing":
