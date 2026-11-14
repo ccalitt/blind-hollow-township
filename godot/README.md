@@ -21,6 +21,15 @@ The project uses the **Compatibility** renderer (OpenGL), so the same build targ
 web and mobile (CONCEPT.md platform sequence). No assets are shipped: every texture, mesh and
 sound is generated in code.
 
+### In a browser
+
+```bash
+godot --headless --path godot --export-release "Web" builds/web/index.html   # needs the 4.3 web export template
+python3 -m http.server 8060 --directory godot/builds/web
+```
+
+The Web preset uses the no-threads template, so any static file server works.
+
 ### Controls
 
 | Action | Input |

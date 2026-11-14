@@ -93,6 +93,6 @@
 ## E. Not built
 
 LLM agents and backend transport (the rule passes keep their boundaries so they slot in);
-hand-drawn art and authored audio; controller support; the web and mobile exports
-(the project is on the Compatibility renderer for them, but no export presets are committed);
-Chapter 2.
+hand-drawn art and authored audio; controller support; desktop and mobile export presets
+(a Web preset is committed in `godot/export_presets.cfg` and the web build has been run in a
+browser); Chapter 2.
